@@ -1,0 +1,86 @@
+[
+  {
+    "id": 1,
+    "title": "Kyiv Charity Run",
+    "description": "5 км благодійний забіг",
+    "date": "2026-05-10",
+    "organizer": "Run Ukraine"
+  },
+  {
+    "id": 2,
+    "title": "Dnipro Marathon",
+    "description": "Повний марафон",
+    "date": "2026-06-01",
+    "organizer": "Sport City"
+  },
+  {
+    "id": 3,
+    "title": "Lviv Night Run",
+    "description": "Нічний забіг",
+    "date": "2026-07-15",
+    "organizer": "Night Runners"
+  },
+  {
+    "id": 4,
+    "title": "Kharkiv Sprint",
+    "description": "3 км дистанція",
+    "date": "2026-08-02",
+    "organizer": "Fast Club"
+  },
+  {
+    "id": 5,
+    "title": "Odesa Beach Run",
+    "description": "Забіг уздовж моря",
+    "date": "2026-08-20",
+    "organizer": "Sea Sport"
+  },
+  {
+    "id": 6,
+    "title": "Vinnytsia Run",
+    "description": "Міський марафон",
+    "date": "2026-09-10",
+    "organizer": "City Run"
+  },
+  {
+    "id": 7,
+    "title": "Poltava Charity Run",
+    "description": "Благодійна подія",
+    "date": "2026-09-21",
+    "organizer": "Heart Fund"
+  },
+  {
+    "id": 8,
+    "title": "Chernihiv Race",
+    "description": "Напівмарафон",
+    "date": "2026-10-03",
+    "organizer": "Run Org"
+  },
+  {
+    "id": 9,
+    "title": "Sumy Run",
+    "description": "Осінній забіг",
+    "date": "2026-10-12",
+    "organizer": "Sport Team"
+  },
+  {
+    "id": 10,
+    "title": "Ternopil Run",
+    "description": "Озерний маршрут",
+    "date": "2026-11-01",
+    "organizer": "Lake Club"
+  },
+  {
+    "id": 11,
+    "title": "Rivne Marathon",
+    "description": "Повна дистанція",
+    "date": "2026-11-15",
+    "organizer": "West Run"
+  },
+  {
+    "id": 12,
+    "title": "Zhytomyr Run",
+    "description": "Міський забіг",
+    "date": "2026-12-05",
+    "organizer": "Run Group"
+  }
+]
