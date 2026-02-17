@@ -1,21 +1,35 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 
 const KEY = "fav_events";
 
-export default function EventCard({ id, title, description, date, organizer }) {
-  const [liked, setLiked] = useState(false);
+const readStorage = () => {
+  try {
+    return JSON.parse(localStorage.getItem(KEY)) || [];
+  } catch {
+    return [];
+  }
+};
 
-  const save = () => {
-    try {
-      const data = JSON.parse(localStorage.getItem(KEY)) || [];
-      if (!data.includes(id)) {
-        data.push(id);
-        localStorage.setItem(KEY, JSON.stringify(data));
-      }
-      setLiked(true);
-    } catch {
+export default function EventCard({ id, title, description, date, organizer }) {
+  const eventId = Number(id);
+
+  const [liked, setLiked] = useState(() => readStorage().includes(eventId));
+
+  const toggleLike = () => {
+    const data = readStorage();
+
+    let updated;
+
+    if (data.includes(eventId)) {
+      updated = data.filter((x) => x !== eventId);
       setLiked(false);
+    } else {
+      updated = [...data, eventId];
+      setLiked(true);
     }
+
+    localStorage.setItem(KEY, JSON.stringify(updated));
   };
 
   return (
@@ -30,10 +44,21 @@ export default function EventCard({ id, title, description, date, organizer }) {
             {organizer}
           </small>
         </div>
-        <div class="d-flex p-4 justify-content-between">
-          <button className="btn btn-outline-secondary mt-2">View</button>
-          <button className="btn btn-outline-primary mt-2" onClick={save}>
-            {liked ? "Цікаво ✓" : "Цікаво"}
+
+        <div className="d-flex p-3 justify-content-between flex-wrap gap-2">
+          <Link
+            to={`/participants/${eventId}`}
+            className="btn btn-outline-secondary"
+          >
+            View
+          </Link>
+
+          <Link to={`/register/${eventId}`} className="btn btn-outline-success">
+            Register
+          </Link>
+
+          <button className="btn btn-outline-primary" onClick={toggleLike}>
+            {liked ? "Liked ✓" : "Like"}
           </button>
         </div>
       </div>
