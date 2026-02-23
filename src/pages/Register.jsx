@@ -1,8 +1,8 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { z } from "zod";
-
-const STORAGE = "event_participants";
+import { useDispatch } from "react-redux";
+import { addParticipant } from "../store/participantsSlice";
 
 const schema = z.object({
   name: z.string().min(3),
@@ -17,6 +17,7 @@ const schema = z.object({
 export default function Register() {
   const { eventId } = useParams();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const [form, setForm] = useState({
     name: "",
@@ -44,13 +45,12 @@ export default function Register() {
       return;
     }
 
-    const all = JSON.parse(localStorage.getItem(STORAGE)) || {};
-
-    if (!all[eventId]) all[eventId] = [];
-
-    all[eventId].push(form);
-
-    localStorage.setItem(STORAGE, JSON.stringify(all));
+    dispatch(
+      addParticipant({
+        ...form,
+        eventId: Number(eventId),
+      })
+    );
 
     navigate(`/participants/${eventId}`);
   };
