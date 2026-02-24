@@ -19,8 +19,14 @@ const eventsSlice = createSlice({
 
       localStorage.setItem("fav_events", JSON.stringify(state.liked));
     },
+    addImportedEvents(state, action) {
+      const newEvents = action.payload.filter(
+        (newEvent) => !state.list.some((e) => e.title === newEvent.title)
+      );
+      state.list = [...newEvents, ...state.list];
+    },
   },
 });
 
-export const { toggleLike } = eventsSlice.actions;
+export const { toggleLike, addImportedEvents } = eventsSlice.actions;
 export default eventsSlice.reducer;

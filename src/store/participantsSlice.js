@@ -43,6 +43,7 @@ const participantsSlice = createSlice({
       const participant = {
         ...action.payload,
         id: Date.now(),
+        registrationDate: new Date().toISOString().split("T")[0],
       };
       adapter.addOne(state, participant);
       const all = JSON.parse(localStorage.getItem(STORAGE)) || {};
