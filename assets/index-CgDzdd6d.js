@@ -102,4 +102,4 @@ const store = createStore(
 [redux-logger v3] import createLogger from 'redux-logger'
 [redux-logger v3] to
 [redux-logger v3] import { createLogger } from 'redux-logger'
-`)};n.defaults=ce,n.createLogger=U,n.logger=me,n.default=me,Object.defineProperty(n,"__esModule",{value:!0})})})(Du,Du.exports)),Du.exports}var GQ=KQ();const VQ=pr(GQ),XQ=x2({reducer:{events:M4,participants:$8,theme:ZQ},middleware:e=>e().concat(VQ)});uk.createRoot(document.getElementById("root")).render(ae.jsx(Qe.StrictMode,{children:ae.jsx(a2,{store:XQ,children:ae.jsxs(jR,{children:[ae.jsx(HQ,{}),ae.jsx(fL,{position:"top-right",autoClose:3e3})]})})}));
+`)};n.defaults=ce,n.createLogger=U,n.logger=me,n.default=me,Object.defineProperty(n,"__esModule",{value:!0})})})(Du,Du.exports)),Du.exports}var GQ=KQ();const VQ=pr(GQ),XQ=x2({reducer:{events:M4,participants:$8,theme:ZQ},middleware:e=>e().concat(VQ)});uk.createRoot(document.getElementById("root")).render(ae.jsx(Qe.StrictMode,{children:ae.jsx(a2,{store:XQ,children:ae.jsxs(jR,{basename:"/web",children:[ae.jsx(HQ,{}),ae.jsx(fL,{position:"top-right",autoClose:3e3})]})})}));
