@@ -1,62 +1,81 @@
 import express from "express";
-import { readFile } from "node:fs/promises";
+import mysql from "mysql2/promise";
 import { CONFIG } from "./config.js";
 
 const app = express();
-const PORT = CONFIG.PORT || 3000;
-
-app.use((req, res, next) => {
-  const now = new Date().toISOString();
-  console.log(`[${now}] ${req.method} запит на: ${req.originalUrl}`);
-  next();
-});
+const pool = mysql.createPool(CONFIG.DB);
 
 app.use(express.json());
 
+app.get("/", (req, res) => {
+  res.json({
+    message: "Marathon API is running",
+    endpoints: {
+      events: "/api/events",
+      infiniteScroll: "/api/events/cursor",
+      participants: "/api/participants/:eventId",
+    },
+  });
+});
+
 app.get("/api/events", async (req, res) => {
   try {
-    const rawData = await readFile(CONFIG.DATA_PATH, "utf-8");
-    let events = JSON.parse(rawData);
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const offset = (page - 1) * limit;
 
-    let page = parseInt(req.query.page) || 1;
-    let limit = parseInt(req.query.limit) || 10;
-    const sortField = req.query.sort;
-    const order = req.query.order === "desc" ? -1 : 1;
+    const allowedSort = ["date", "title"];
+    const sortField = allowedSort.includes(req.query.sort)
+      ? req.query.sort
+      : "date";
+    const order = req.query.order === "desc" ? "DESC" : "ASC";
 
-    if (page < 1) {
-      return res
-        .status(400)
-        .json({ error: "Параметр 'page' не може бути менше 1" });
-    }
+    const [rows] = await pool.query(
+      `SELECT * FROM events ORDER BY ${sortField} ${order} LIMIT ? OFFSET ?`,
+      [limit, offset]
+    );
 
-    if (sortField === "date" || sortField === "title") {
-      events.sort((a, b) => {
-        if (a[sortField] < b[sortField]) return -1 * order;
-        if (a[sortField] > b[sortField]) return 1 * order;
-        return 0;
-      });
-    }
+    const [[{ total }]] = await pool.query(
+      "SELECT COUNT(*) as total FROM events"
+    );
 
-    const startIndex = (page - 1) * limit;
-    const endIndex = page * limit;
-    const paginatedEvents = events.slice(startIndex, endIndex);
-
-    res.json({
-      total: events.length,
-      page,
-      limit,
-      data: paginatedEvents,
-    });
+    res.json({ total, page, limit, data: rows });
   } catch (err) {
-    console.error("Помилка:", err.message);
-    res.status(500).json({ error: "Внутрішня помилка сервера" });
+    res.status(500).json({ error: err.message });
   }
 });
 
-app.use((req, res) => {
-  res.status(404).json({ error: "Маршрут не знайдено (404)" });
+app.get("/api/events/cursor", async (req, res) => {
+  try {
+    const lastId = parseInt(req.query.lastId) || 0;
+    const limit = parseInt(req.query.limit) || 10;
+
+    const [rows] = await pool.query(
+      "SELECT * FROM events WHERE id > ? ORDER BY id ASC LIMIT ?",
+      [lastId, limit]
+    );
+
+    res.json({
+      data: rows,
+      nextCursor: rows.length > 0 ? rows[rows.length - 1].id : null,
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
-app.listen(PORT, () => {
-  console.log(`Сервер Express запущено: http://localhost:${PORT}/api/events`);
+app.get("/api/participants/:eventId", async (req, res) => {
+  try {
+    const [rows] = await pool.query(
+      "SELECT * FROM participants WHERE eventId = ?",
+      [req.params.eventId]
+    );
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.listen(CONFIG.PORT, () => {
+  console.log(`Сервер запщен на http://localhost:${CONFIG.PORT}`);
 });
