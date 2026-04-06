@@ -1,0 +1,72 @@
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { setCredentials } from "../store/authSlice";
+import { toast } from "react-toastify";
+
+export default function Login() {
+  const [form, setForm] = useState({ username: "", password: "" });
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  const handleChange = (e) =>
+    setForm({ ...form, [e.target.name]: e.target.value });
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      const response = await fetch("http://localhost:3000/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) throw new Error(data.error || "Помилка входу");
+
+      dispatch(setCredentials(data.user));
+      toast.success("Ви успішно увійшли!");
+      navigate("/");
+    } catch (err) {
+      toast.error(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="card p-4 shadow-sm mx-auto" style={{ maxWidth: "400px" }}>
+      <h3 className="text-center mb-4">Вхід для організаторів</h3>
+      <form onSubmit={handleSubmit}>
+        <div className="mb-3">
+          <label className="form-label">Логін</label>
+          <input
+            className="form-control"
+            name="username"
+            value={form.username}
+            onChange={handleChange}
+            required
+          />
+        </div>
+        <div className="mb-3">
+          <label className="form-label">Пароль</label>
+          <input
+            type="password"
+            className="form-control"
+            name="password"
+            value={form.password}
+            onChange={handleChange}
+            required
+          />
+        </div>
+        <button className="btn btn-primary w-100" disabled={loading}>
+          {loading ? "Вхід..." : "Увійти"}
+        </button>
+      </form>
+    </div>
+  );
+}
