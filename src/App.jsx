@@ -8,12 +8,12 @@ import Analytics from "./pages/Analytics";
 import Login from "./pages/Login";
 
 const PrivateRoute = ({ children }) => {
-  const { isAuthenticated } = useSelector((state) => state.auth);
-  return isAuthenticated ? children : <Navigate to="/login" />;
+  const auth = useSelector((state) => state.auth);
+  return auth?.isAuthenticated ? children : <Navigate to="/login" />;
 };
 
 export default function App() {
-  const { isAuthenticated, user } = useSelector((state) => state.auth);
+  const { isAuthenticated, user } = useSelector((state) => state.auth) || {};
 
   return (
     <div className="container mt-4">
@@ -31,7 +31,7 @@ export default function App() {
           <div className="ms-auto">
             {isAuthenticated ? (
               <span className="badge bg-success p-2">
-                Організатор: {user.username}
+                Організатор: {user?.username || "Завантаження..."}
               </span>
             ) : (
               <Link to="/login" className="btn btn-primary">
@@ -55,7 +55,6 @@ export default function App() {
             </PrivateRoute>
           }
         />
-
         <Route path="*" element={<NotFound />} />
       </Routes>
     </div>

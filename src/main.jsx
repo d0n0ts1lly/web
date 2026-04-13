@@ -14,7 +14,7 @@ import "react-toastify/dist/ReactToastify.css";
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <Provider store={store}>
-      <BrowserRouter basename="/web">
+      <BrowserRouter>
         <App />
         <ToastContainer position="top-right" autoClose={3000} />
       </BrowserRouter>

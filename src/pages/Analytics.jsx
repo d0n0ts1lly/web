@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import {
   LineChart,
   Line,
@@ -10,40 +10,74 @@ import {
 } from "recharts";
 
 export default function Analytics() {
-  const data = useMemo(() => {
-    const allEventsData =
-      JSON.parse(localStorage.getItem("event_participants")) || {};
-    const allParticipants = Object.values(allEventsData).flat();
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-    const counts = allParticipants.reduce((acc, p) => {
-      const date = p.registrationDate || "Невідомо";
-      acc[date] = (acc[date] || 0) + 1;
-      return acc;
-    }, {});
+  useEffect(() => {
+    const fetchAnalytics = async () => {
+      try {
+        const response = await fetch(
+          "http://localhost:3000/api/analytics/registrations"
+        );
+        if (!response.ok) throw new Error("Помилка завантаження статистики");
+        const result = await response.json();
 
-    return Object.entries(counts)
-      .map(([date, count]) => ({ date, count }))
-      .sort((a, b) => new Date(a.date) - new Date(b.date));
+        const formattedData = result.map((item) => ({
+          date: new Date(item.date).toLocaleDateString(),
+          count: item.count,
+        }));
+
+        setData(formattedData);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAnalytics();
   }, []);
+
+  if (loading)
+    return (
+      <div className="text-center p-5">
+        <div className="spinner-border" />
+      </div>
+    );
 
   return (
     <div className="card p-4 shadow-sm">
-      <h3>Аналітика реєстрацій</h3>
-      <div style={{ width: "100%", height: 300 }}>
-        <ResponsiveContainer>
-          <LineChart data={data}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="date" />
-            <YAxis allowDecimals={false} />
-            <Tooltip />
-            <Line
-              type="monotone"
-              dataKey="count"
-              stroke="#8884d8"
-              strokeWidth={3}
-            />
-          </LineChart>
-        </ResponsiveContainer>
+      <h3 className="mb-4">Аналітика реєстрацій (динаміка)</h3>
+      <div style={{ width: "100%", height: 350 }}>
+        {data.length > 0 ? (
+          <ResponsiveContainer>
+            <LineChart data={data}>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} />
+              <XAxis dataKey="date" tick={{ fontSize: 12 }} minTickGap={30} />
+              <YAxis allowDecimals={false} tick={{ fontSize: 12 }} />
+              <Tooltip
+                contentStyle={{
+                  borderRadius: "8px",
+                  border: "none",
+                  boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
+                }}
+              />
+              <Line
+                type="monotone"
+                dataKey="count"
+                name="Кількість реєстрацій"
+                stroke="#0d6efd"
+                strokeWidth={3}
+                dot={{ r: 4 }}
+                activeDot={{ r: 6 }}
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        ) : (
+          <div className="text-center text-muted pt-5">
+            Дані для аналітики відсутні
+          </div>
+        )}
       </div>
     </div>
   );

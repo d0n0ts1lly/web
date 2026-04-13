@@ -42,13 +42,15 @@ async function init() {
       email VARCHAR(255) NOT NULL,
       birthDate DATE,
       source VARCHAR(50),
+      registration_date DATETIME DEFAULT CURRENT_TIMESTAMP, 
       FOREIGN KEY (eventId) REFERENCES events(id) ON DELETE CASCADE,
-      INDEX idx_event (eventId)
+      INDEX idx_event (eventId),
+      INDEX idx_reg_date (registration_date)
     )
   `);
 
-  console.log("БД та структури створено успішно");
+  console.log("✅ БД та структури створено успішно");
   await connection.end();
 }
 
-init();
+init().catch(console.error);

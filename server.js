@@ -37,6 +37,20 @@ const isAuthenticated = (req, res, next) => {
   res.status(401).json({ error: "Доступ заборонено." });
 };
 
+app.get("/api/analytics/registrations", async (req, res) => {
+  try {
+    const [rows] = await pool.query(`
+      SELECT DATE(registration_date) as date, COUNT(*) as count 
+      FROM participants 
+      GROUP BY DATE(registration_date)
+      ORDER BY date ASC
+    `);
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.post("/api/auth/register", async (req, res) => {
   const { username, password } = req.body;
   try {
@@ -82,6 +96,15 @@ app.post("/api/events", isAuthenticated, async (req, res) => {
   res.status(201).json({ id: result.insertId });
 });
 
+app.get("/api/events", async (req, res) => {
+  try {
+    const [rows] = await pool.query("SELECT * FROM events ORDER BY date DESC");
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.put("/api/events/:id", isAuthenticated, async (req, res) => {
   const { title, description, date, organizer } = req.body;
   const [rows] = await pool.query(
@@ -108,6 +131,19 @@ app.delete("/api/events/:id", isAuthenticated, async (req, res) => {
     return res.json({ message: "Видалено" });
   }
   res.status(403).json({ error: "Заборонено" });
+});
+
+app.get("/api/participants", async (req, res) => {
+  const { eventId } = req.query;
+  try {
+    const [rows] = await pool.query(
+      "SELECT * FROM participants WHERE eventId = ?",
+      [eventId]
+    );
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 app.post("/api/participants", async (req, res) => {

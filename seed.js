@@ -6,20 +6,20 @@ async function seed() {
   const connection = await mysql.createConnection(CONFIG.DB);
 
   const hashedPassword = await bcrypt.hash("admin123", 10);
-  const [userResult] = await connection.query(
+  await connection.query(
     "INSERT IGNORE INTO users (username, password, role) VALUES (?, ?, ?)",
     ["admin", hashedPassword, "Organizer"]
   );
 
-  let creatorId;
-  if (userResult.insertId) {
-    creatorId = userResult.insertId;
-  } else {
-    const [rows] = await connection.query(
-      "SELECT id FROM users WHERE username = 'admin'"
-    );
-    creatorId = rows[0].id;
-  }
+  const [userRows] = await connection.query(
+    "SELECT id FROM users WHERE username = 'admin'"
+  );
+  const creatorId = userRows[0].id;
+
+  await connection.query("SET FOREIGN_KEY_CHECKS = 0");
+  await connection.query("TRUNCATE TABLE participants");
+  await connection.query("TRUNCATE TABLE events");
+  await connection.query("SET FOREIGN_KEY_CHECKS = 1");
 
   const events = [
     [
@@ -61,25 +61,59 @@ async function seed() {
   const eventId = eventRows[0].id;
 
   const participants = [
-    [eventId, "Ivan Ivanov", "ivan@test.com", "1990-01-01", "Social Media"],
-    [eventId, "Petro Petrov", "petro@test.com", "1992-05-12", "Friends"],
+    [
+      eventId,
+      "Ivan Ivanov",
+      "ivan@test.com",
+      "1990-01-01",
+      "Social Media",
+      "2026-04-01 10:00:00",
+    ],
+    [
+      eventId,
+      "Petro Petrov",
+      "petro@test.com",
+      "1992-05-12",
+      "Friends",
+      "2026-04-02 11:30:00",
+    ],
     [
       eventId,
       "Olena Sydorenko",
       "olena@test.com",
       "1995-10-10",
       "Found Myself",
+      "2026-04-02 14:20:00",
+    ],
+    [
+      eventId,
+      "Andriy Shevchenko",
+      "andriy@test.com",
+      "1988-03-20",
+      "Ads",
+      "2026-04-03 09:15:00",
+    ],
+    [
+      eventId,
+      "Maria Kononenko",
+      "maria@test.com",
+      "1999-12-05",
+      "Instagram",
+      "2026-04-05 18:00:00",
     ],
   ];
 
   await connection.query(
-    "INSERT INTO participants (eventId, fullName, email, birthDate, source) VALUES ?",
+    "INSERT INTO participants (eventId, fullName, email, birthDate, source, registration_date) VALUES ?",
     [participants]
   );
 
-  console.log(
-    "Дані успішно додано. Створено користувача 'admin' з паролем 'admin123'"
-  );
+  console.log("--------------------------------------------------");
+  console.log("✅ Базу успішно заповнено тестовими даними!");
+  console.log("👤 Логін: admin");
+  console.log("🔑 Пароль: admin123");
+  console.log("--------------------------------------------------");
+
   await connection.end();
 }
 

@@ -20,18 +20,30 @@ export default function Login() {
     try {
       const response = await fetch("http://localhost:3000/api/auth/login", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify(form),
+        credentials: "include",
       });
 
       const data = await response.json();
 
-      if (!response.ok) throw new Error(data.error || "Помилка входу");
+      if (!response.ok) {
+        throw new Error(data.error || "Помилка входу");
+      }
 
-      dispatch(setCredentials(data.user));
+      dispatch(
+        setCredentials({
+          user: data.user,
+          isAuthenticated: true,
+        })
+      );
+
       toast.success("Ви успішно увійшли!");
       navigate("/");
     } catch (err) {
+      console.error("Login error:", err);
       toast.error(err.message);
     } finally {
       setLoading(false);
@@ -49,6 +61,7 @@ export default function Login() {
             name="username"
             value={form.username}
             onChange={handleChange}
+            autoComplete="username"
             required
           />
         </div>
@@ -60,11 +73,19 @@ export default function Login() {
             name="password"
             value={form.password}
             onChange={handleChange}
+            autoComplete="current-password"
             required
           />
         </div>
         <button className="btn btn-primary w-100" disabled={loading}>
-          {loading ? "Вхід..." : "Увійти"}
+          {loading ? (
+            <>
+              <span className="spinner-border spinner-border-sm me-2"></span>
+              Вхід...
+            </>
+          ) : (
+            "Увійти"
+          )}
         </button>
       </form>
     </div>

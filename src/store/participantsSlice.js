@@ -2,28 +2,27 @@ import {
   createSlice,
   createAsyncThunk,
   createEntityAdapter,
+  createSelector,
 } from "@reduxjs/toolkit";
-
 import { toast } from "react-toastify";
-import { createSelector } from "@reduxjs/toolkit";
 
 const adapter = createEntityAdapter({
   selectId: (participant) => participant.id,
 });
 
-const STORAGE = "event_participants";
-
 export const fetchParticipants = createAsyncThunk(
   "participants/fetchParticipants",
   async (eventId) => {
-    await new Promise((res) => setTimeout(res, 500));
+    const response = await fetch(
+      `http://localhost:3000/api/participants?eventId=${eventId}`
+    );
+    if (!response.ok) throw new Error("Помилка завантаження");
 
-    const all = JSON.parse(localStorage.getItem(STORAGE)) || {};
-    const list = all[eventId] || [];
+    const data = await response.json();
 
-    return list.map((p, index) => ({
+    return data.map((p) => ({
       ...p,
-      id: p.id ?? Date.now() + index,
+      name: p.fullName,
     }));
   }
 );
@@ -40,37 +39,23 @@ const participantsSlice = createSlice({
       state.search = action.payload;
     },
     addParticipant(state, action) {
-      const participant = {
-        ...action.payload,
-        id: Date.now(),
-        registrationDate: new Date().toISOString().split("T")[0],
-      };
-      adapter.addOne(state, participant);
-      const all = JSON.parse(localStorage.getItem(STORAGE)) || {};
-      const eventId = participant.eventId;
-
-      if (!all[eventId]) {
-        all[eventId] = [];
-      }
-
-      all[eventId].push(participant);
-
-      localStorage.setItem(STORAGE, JSON.stringify(all));
+      adapter.addOne(state, action.payload);
     },
   },
   extraReducers: (builder) => {
     builder
       .addCase(fetchParticipants.pending, (state) => {
         state.loading = true;
+        state.error = null;
       })
       .addCase(fetchParticipants.fulfilled, (state, action) => {
         state.loading = false;
         adapter.setAll(state, action.payload);
       })
-      .addCase(fetchParticipants.rejected, (state) => {
+      .addCase(fetchParticipants.rejected, (state, action) => {
         state.loading = false;
-        state.error = "Помилка завантаження";
-        toast.error("Помилка завантаження учасників");
+        state.error = action.error.message;
+        toast.error("Не вдалося завантажити учасників з сервера");
       });
   },
 });
@@ -82,21 +67,15 @@ export const participantsSelectors = adapter.getSelectors(
 );
 
 export const selectFilteredParticipants = createSelector(
-  [
-    participantsSelectors.selectAll,
-    (state) => state.participants.search,
-    (state, eventId) => eventId,
-  ],
-  (all, search, eventId) => {
+  [participantsSelectors.selectAll, (state) => state.participants.search],
+  (all, search) => {
     const query = search.toLowerCase();
-
-    return all.filter((p) => {
-      const matchesEvent = p.eventId === Number(eventId);
-      const matchesSearch =
-        p.name.toLowerCase().includes(query) ||
-        p.email.toLowerCase().includes(query);
-      return matchesEvent && matchesSearch;
-    });
+    return all.filter(
+      (p) =>
+        p.fullName?.toLowerCase().includes(query) ||
+        p.email?.toLowerCase().includes(query)
+    );
   }
 );
+
 export default participantsSlice.reducer;
