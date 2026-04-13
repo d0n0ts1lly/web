@@ -19,7 +19,7 @@
     "bcrypt": "^6.0.0",
     "bootstrap": "^5.3.8",
     "cors": "^2.8.6",
-    "express": "^5.2.1",
+    "express": "4.22.1",
     "express-session": "^1.19.0",
     "graphql": "^16.13.2",
     "mysql2": "^3.21.0",
