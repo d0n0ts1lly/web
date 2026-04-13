@@ -8,6 +8,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
 
 export default function Analytics() {
   const [data, setData] = useState([]);
@@ -16,9 +17,7 @@ export default function Analytics() {
   useEffect(() => {
     const fetchAnalytics = async () => {
       try {
-        const response = await fetch(
-          "http://localhost:3000/api/analytics/registrations"
-        );
+        const response = await fetch(`${API_URL}/api/analytics/registrations`);
         if (!response.ok) throw new Error("Помилка завантаження статистики");
         const result = await response.json();
 

@@ -5,6 +5,7 @@ import {
   createSelector,
 } from "@reduxjs/toolkit";
 import { toast } from "react-toastify";
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
 
 const adapter = createEntityAdapter({
   selectId: (participant) => participant.id,
@@ -14,7 +15,7 @@ export const fetchParticipants = createAsyncThunk(
   "participants/fetchParticipants",
   async (eventId) => {
     const response = await fetch(
-      `http://localhost:3000/api/participants?eventId=${eventId}`
+      `${API_URL}/api/participants?eventId=${eventId}`
     );
     if (!response.ok) throw new Error("Помилка завантаження");
 

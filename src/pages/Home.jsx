@@ -6,6 +6,7 @@ import EventList from "../components/EventList";
 import Pagination from "../components/Pagination";
 
 const PER_PAGE = 6;
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
 
 export default function Home() {
   const [page, setPage] = useState(1);
@@ -16,7 +17,7 @@ export default function Home() {
   useEffect(() => {
     const loadEvents = async () => {
       try {
-        const response = await fetch("http://localhost:3000/api/events");
+        const response = await fetch(`${API_URL}/api/events`);
         if (!response.ok) throw new Error("Помилка завантаження");
         const data = await response.json();
 
@@ -38,7 +39,7 @@ export default function Home() {
 
   const handleImport = async () => {
     try {
-      const response = await fetch("http://localhost:3000/api/events");
+      const response = await fetch(`${API_URL}/api/events`);
 
       if (!response.ok) throw new Error("Помилка мережі");
 
