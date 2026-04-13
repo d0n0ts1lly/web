@@ -14,10 +14,31 @@ import { CONFIG } from "./config.js";
 const app = express();
 const pool = mysql.createPool(CONFIG.DB);
 
+app.set("trust proxy", 1);
+
 app.use(
   cors({
-    origin: ["http://localhost:5173", "https://studio.apollographql.com"],
+    origin: [
+      "http://localhost:5173",
+      "https://studio.apollographql.com",
+      /\.vercel\.app$/,
+    ],
     credentials: true,
+  })
+);
+
+app.use(
+  session({
+    secret: "marathon_secret_key_2026",
+    resave: false,
+    saveUninitialized: false,
+    proxy: true,
+    cookie: {
+      secure: true,
+      httpOnly: true,
+      sameSite: "none",
+      maxAge: 24 * 60 * 60 * 1000,
+    },
   })
 );
 
